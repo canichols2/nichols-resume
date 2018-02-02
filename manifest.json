@@ -1,0 +1,7 @@
+{
+  "name": "web-resume",
+  "short_name": "web-resume",
+  "description": "Resume Template",
+  "start_url": "/",
+  "display": "standalone"
+}

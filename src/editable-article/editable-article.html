@@ -1,0 +1,185 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="editable-article">
+   <template>
+      <style>
+         :host {
+            display: block;
+            clear: both;
+            /* float: left; */
+         }
+         paper-button{
+            background:var(--secondary-color) !important;
+            margin-top: 1em;
+         }
+         article{
+            position: relative;
+            /* background: rgb(158, 195, 212); */
+            padding: 5px;
+            /* box-shadow: 0px 0px 10px -3px ; */
+            border-radius: 3px;
+         }
+         article paper-icon-button{
+            position: absolute;
+            top: 15px;
+            right: 5px;
+         }
+         article code-sample{
+            max-height:200px;
+            overflow: auto;
+            border-radius: 3px;
+         }
+         iron-input{}iron-input input{
+            font-size:1.5em;
+            margin:0.83em 0px;
+            font-family: Verdana, sans-serif;
+
+         }
+         iron-input,iron-autogrow-textarea{
+            display: block;
+            width: 100%;
+         }
+         [hidden] { display: none }
+         .paper-button-container{
+            /* float: right; */
+            /* clear: both; */
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: flex-end;
+         }
+         pre{
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            word-wrap: break-word; 
+            font-family: 'Roboto', sans-serif;
+         }
+         .code{
+            background: darkslategrey;
+            color: aliceblue;
+         }
+         .removeBtn{
+            background: red !important;
+            color: black;
+         }
+      </style>
+
+      <article>
+            <template is="dom-if" if="{{editable}}">
+               <paper-icon-button on-tap="toggleEdit" hidden$="{{editing}}" icon="editor:mode-edit"></paper-icon-button>
+            </template>
+
+            <template is="dom-if" if="{{title}}">
+               <h2 class="title" hidden$="{{editing}}">{{code.title}}</h2>
+            </template>
+            <iron-input bind-value="{{code.title}}" hidden$="{{!editing}}">
+               <input value="{{value::input}}">
+            </iron-input>  
+
+            <template is="dom-if" if="{{paragraph}}">
+               <pre hidden$="{{editing}}">{{code.description}}</pre>
+            </template>          
+            <iron-autogrow-textarea  value="{{code.description}}" hidden$="{{!editing}}"></iron-autogrow-textarea>
+            
+            <div hidden$="{{!showCode}}">
+               <code-sample hidden$="{{editing}}" id="codeSample">
+                  <template preserve-content>
+                     {{code.code}}
+                  </template>
+               </code-sample>
+            </div>
+            <iron-autogrow-textarea class="code" value="{{code.code}}" hidden$="{{!editing}}"></iron-autogrow-textarea>
+            <div class="paper-button-container">
+               <paper-button class="removeBtn" raised on-tap="removeItem" hidden$="{{!editing}}">Remove</paper-button>
+               <paper-button raised on-tap="toggleEdit" hidden$="{{!editing}}">Done</paper-button>
+            </div>
+      </article>
+      
+
+   </template>
+
+   <script>
+      /**
+       * `editable-article` Meant to be part of the code deplay  portion. and allow editing of content in place.
+       *
+       * @summary edit an article.
+       * @customElement
+       * @polymer
+       * @extends {Polymer.Element}
+       */
+      class EditableArticle extends Polymer.Element {
+         /**
+          * String providing the tag name to register the element under.
+          */
+         static get is() {
+            return 'editable-article';
+         }
+
+         /**
+          * Object describing property-related metadata used by Polymer features
+          */
+         static get properties() {
+            return {
+               paragraph:{type:Boolean,value:false},
+               title:{type:Boolean,value:false},
+               showCode:{type:Boolean,value:false},
+               deleteItem:{type:String,notify:true},
+               editable:{
+                  type:Boolean,
+                  value:false
+               },
+               editing:{
+                  type:Boolean,
+                  value:false
+               },
+               code:{
+                  type:Object,
+                  notify:true,
+                  observer:"codeChanged"
+               }
+            };
+         }
+         removeItem(){
+            this.deleteItem=this.code.$key;
+            this.editing=false;
+            return;
+            var key = this.code.$key
+            console.log("removing item:",key)
+            this.dispatchEvent(new CustomEvent('deleteChild',{key:key}))
+         }
+         /**
+          * Instance of the element is created/upgraded. Use: initializing state,
+          * set up event listeners, create shadow dom.
+          * @constructor
+          */
+         constructor() {
+            super();
+         }
+         setCode(){
+            this.$.codeSample.innerHTML = "<template>\n"+this.code.code+"\n\n</template>"
+         }
+         /**
+          * Use for one-time configuration of your component after local DOM is initialized. 
+          */
+         ready() {
+            super.ready();
+
+            Polymer.RenderStatus.afterNextRender(this, function() {
+            });
+               // this.$.codeSample.innerHTML = "<template>\n"+this.code.code+"\n\n</template>"
+         }
+         toggleEdit(){
+            this.editing = !this.editing;
+         }
+         codeChanged(newElement,oldElement){
+            // console.log("Code Changed: ",newElement)
+            this.setCode()
+         }
+
+      }
+
+      window.customElements.define(EditableArticle.is, EditableArticle);
+   </script>
+</dom-module>

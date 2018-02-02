@@ -1,0 +1,116 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<dom-module id="editable-p">
+   <template>
+      <style>
+         :host {
+            display: block
+         }
+         pre{
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            word-wrap: break-word; 
+            font-family: 'Roboto', sans-serif;
+         }
+         pre,div, iron-autogrow-textarea{
+            display: block;
+            width: 100%;
+            font-family: 'Roboto', sans-serif;
+         }
+         pre:hover,div:hover{
+            border: dashed grey 1px;
+         }
+         
+         [hidden] { display: none }
+      </style>
+
+      <pre id="display" hidden$="{{editing}}">{{data}}</pre>
+      <iron-autogrow-textarea on-blur="toggleEdit" id="edit" value="{{data}}" hidden$="{{!editing}}"></iron-autogrow-textarea>
+      
+
+   </template>
+
+   <script>
+      /**
+       * `editable-p` Click the paragraph tag to edit, if editable
+       *
+       * @summary click to edit.
+       * @customElement
+       * @polymer
+       * @extends {Polymer.Element}
+       */
+      class EditableP extends Polymer.Element {
+         /**
+          * String providing the tag name to register the element under.
+          */
+         static get is() {
+            return 'editable-p';
+         }
+
+         /**
+          * Object describing property-related metadata used by Polymer features
+          */
+         static get properties() {
+            return {
+               editable:{
+                  type:Boolean,
+                  value:false
+               },
+               editing:{
+                  type:Boolean,
+                  value:false
+               },
+               data:{
+                  type:Object,
+                  value:"",
+                  notify:true
+               }
+            };
+         }
+         static get listeners() {
+         //  return {'click': '_onClick'}
+        }
+
+        _onClick(e) {
+            if(!this.editing)
+               this.toggleEdit()
+               e.stopPropagation()
+        }
+         toggleEdit(){
+            // console.info(e.target.id + ' was clicked.');
+            console.log("toggleEdit: editable:",this.editable)
+            console.log("toggleEdit: editing:",this.editing)
+            // if(e.target.id == "")
+               if(this.editable){
+                  this.editing = !this.editing
+               }
+               else
+                  this.editing = false
+               if(this.editing)
+                  this.$.edit.focus()
+         }
+
+         /**
+          * Instance of the element is created/upgraded. Use: initializing state,
+          * set up event listeners, create shadow dom.
+          * @constructor
+          */
+         constructor() {
+            super();
+         }
+
+         /**
+          * Use for one-time configuration of your component after local DOM is initialized. 
+          */
+         ready() {
+            super.ready();
+
+            Polymer.RenderStatus.afterNextRender(this, function() {
+               this.addEventListener('click',this._onClick)
+            });
+         }
+
+      }
+
+      window.customElements.define(EditableP.is, EditableP);
+   </script>
+</dom-module>

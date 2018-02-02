@@ -1,0 +1,209 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<dom-module id="web-resume-app">
+   <template>
+      <style>
+         :host {
+            display: block;
+            background: var(--primary-color);
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-flow: column nowrap;
+            align-items: center;
+         }
+         n-nav{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+         }
+         img{
+            max-width: 100%;
+
+         }
+         main{
+            background: var(--light-primary-color);
+            box-shadow: 0px 0px 10px -2px;
+            max-width:700px;
+            width: 80vw;
+            padding: 0 5px;
+            /* padding-top: 40px; */
+            min-height: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-flow: column nowrap;
+         }
+         [hidden] { display: none !important}
+         .padding-top{
+            padding: 0;
+            margin: 0;
+            height: 55px;
+            order: 0;
+            flex: 0 0;
+         }  
+         .padding-bio-bot{
+            height: 250px;
+         }
+      </style>
+      <firebase-app auth-domain="resume-nichols.firebaseapp.com" database-url="https://resume-nichols.firebaseio.com/" api-key="AIzaSyBTH3REs2uyuZkNA2ioiQwMjOqtYFuUERY" ></firebase-app>
+      <firebase-auth id="nicholsAuth" provider="google" user="{{user}}"></firebase-auth>
+      <firebase-query id="code" path="/code" data="{{codeData}}"> </firebase-query>
+      <firebase-document id="bio" path="/bio" data="{{bioData}}"> </firebase-document>
+      <firebase-query id="experiences" path="/experiences" data="{{experiencesData}}"> </firebase-query>
+      <firebase-query id="technology" path="/technologies" data="{{technologyData}}"> </firebase-query>
+      <app-location route="{{route}}" ></app-location>
+      <app-route
+         route="{{route}}"
+         pattern="/:page"
+         data="{{data}}"
+         tail="{{tail}}">
+      </app-route>
+      <main>
+         <n-nav></n-nav>
+         <div class="padding-top"></div>
+         <!-- <div>Current Page: {{data.page}}</div> -->
+         <iron-pages attr-for-selected="page" selected="[[data.page]]">
+            <section page="bio">
+               <img src="src/img/profile01.jpg">
+               <!-- <img src="{{bioData.img}}"> -->
+               <h2>{{bioData.name}}</h2>
+               <editable-p editable$="{{user}}" data="{{bioData.description}}"></editable-p>
+               <div class="padding-bio-bot"></div>
+            </section>
+            <section page="code">
+               <template is="dom-repeat" items="{{codeData}}" as="code">
+                  <editable-article delete-item="{{deleteItem}}"  paragraph$="{{code.description}}"  title$="{{code.title}}"  show-code$="{{code.code}}" code="{{code}}" editable$="{{user}}"></editable-article>
+               </template>
+               <div class="padding-bio-bot"></div>
+            </section>
+            <section page="experiences">
+               <template is="dom-repeat" items="{{experiencesData}}" as="code">
+                  <editable-article delete-item="{{deleteItem}}"  paragraph$="{{code.description}}"  title$="{{code.title}}"  show-code$="{{code.code}}" code="{{code}}" editable$="{{user}}"></editable-article>
+               </template>
+               <div class="padding-bio-bot"></div>
+            </section>
+            <section page="technology">
+               <template is="dom-repeat" items="{{technologyData}}" as="code">
+                  <editable-article delete-item="{{deleteItem}}" paragraph$="{{code.description}}"  title$="{{code.title}}"  show-code$="{{code.code}}" code="{{code}}" editable$="{{user}}"></editable-article>
+               </template>
+               <div class="padding-bio-bot"></div>
+            </section>
+         </iron-pages>
+      </main>
+      <my-fab hidden$="{{!user}}" on-tap="newElement"></my-fab>
+   </template>
+
+   <script>
+      /**
+       * @customElement
+       * @polymer
+       */
+      class WebResumeApp extends Polymer.Element {
+         static get is() { return 'web-resume-app'; }
+         static get properties() {
+            return {
+               prop1: {
+                  type: String,
+                  value: 'web-resume-app'
+               },
+               page:{
+                  type:String,
+                  value:"bio"
+               },
+               deleteItem:{
+                  type:String,
+                  value:"",
+                  notify:true,
+                  observer:"deleteElement"
+               },
+               data:{
+                  type:Object,
+                  observer:"routeChanged",
+                  value:{page:""}
+               },
+               user:{
+                  type:Object,
+                  notify:true
+               },
+               codeData:{
+                  type:Object,
+                  notify:true,
+                  observer:"newData"
+               }
+            };
+         }
+         static get observers(){
+            return [
+               'fbqueryChange(codeData.splices)'
+            ]
+         }
+         newElement(e){
+            console.log("Add new button was clicked")
+            console.log("page: ",this.data.page)
+            e.stopPropagation();
+            switch (this.data.page){
+               case 'bio':break;
+               case 'code':
+                  console.log("new Code article")
+                  this.$.code.ref.push({
+                     title:"new code title",
+                     description:"New Code Description.This is a random description."
+                  })
+                  break;
+               case 'experiences':
+                  console.log("new Experiences article")
+                  this.$.experiences.ref.push({
+                     title:"new experiences title",
+                     description:"New experiences Description.This is a random description."
+                  })
+                  break;
+               case 'technology':
+                  console.log("new technology article")
+                  this.$.technology.ref.push({
+                     title:"new technology title",
+                     description:"New technology Description.This is a random description."
+                  })
+                  break;
+               
+
+            }
+         }
+         ready(){
+            super.ready();
+            // this.$$('editable-article').addEventListener('deleteChild',this.deleteElement.bind(this))
+         }
+         deleteElement(key){
+            if(key=="")return;
+            console.log("Deleting:",key,"From:",this.data.page)
+            switch (this.data.page){
+               case 'bio':break;
+               case 'code':
+                  this.$.code.ref.child(key).remove()
+                  break;
+               case 'experiences':
+                  this.$.experiences.ref.child(key).remove()
+                  break;
+               case 'technology':
+                  this.$.technology.child(key).remove()
+                  break;
+            }
+            this.deleteItem = "";               
+         }
+         routeChanged(nD,oD){
+            console.log("Route Changed: ",nD)
+         }
+         fbqueryChange(changeRecord){
+            console.log("change record: ",changeRecord)
+         }
+         newData(newData,oldData){
+            console.log("newData",newData)
+            console.log("oldData",oldData)
+         }
+      }
+
+      window.customElements.define(WebResumeApp.is, WebResumeApp);
+   </script>
+</dom-module>

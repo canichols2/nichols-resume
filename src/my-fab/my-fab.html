@@ -1,0 +1,83 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="my-fab">
+   <template>
+      <style>
+         :host[hidden]{
+            display:none;
+         }
+         :host {
+            display: block
+         }
+         paper-fab{
+            position: fixed;
+            right: 10%;
+            top: 50px;
+         }
+         @media screen and (max-width:1050px){
+            paper-fab{
+               position: fixed;
+               bottom: 10px;
+               right: 10px;
+               top: auto;
+            }
+         }
+      </style>
+
+      
+      <paper-fab icon="add"></paper-fab>
+      
+
+   </template>
+
+   <script>
+      /**
+       * `my-fab` custom wrapper for the paper-fab element. To make it either sit on the bottom right, or float at the top, depending on the screen size.
+       *
+       * @summary wrapper for paper-fab.
+       * @customElement
+       * @polymer
+       * @extends {Polymer.Element}
+       */
+      class MyFab extends Polymer.Element {
+         /**
+          * String providing the tag name to register the element under.
+          */
+         static get is() {
+            return 'my-fab';
+         }
+
+         /**
+          * Object describing property-related metadata used by Polymer features
+          */
+         static get properties() {
+            return {
+               
+            };
+         }
+
+         /**
+          * Instance of the element is created/upgraded. Use: initializing state,
+          * set up event listeners, create shadow dom.
+          * @constructor
+          */
+         constructor() {
+            super();
+         }
+
+         /**
+          * Use for one-time configuration of your component after local DOM is initialized. 
+          */
+         ready() {
+            super.ready();
+
+            Polymer.RenderStatus.afterNextRender(this, function() {
+               
+            });
+         }
+
+      }
+
+      window.customElements.define(MyFab.is, MyFab);
+   </script>
+</dom-module>
